@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive OS Concepts Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Visualization & Content Choices:
+        - Q1 (Components): Goal: Inform. Method: HTML list. Interaction: Static display. Justification: Clear presentation of distinct items.
+        - Q2 (OS Def & Goals): Goal: Inform. Method: HTML list. Interaction: Static display. Justification: Clear presentation.
+        - Q3 (Kernel): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q4 (Resource Allocator): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q5 (Control Program): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q6 (OS History): Goal: Change/Inform. Method: Vertical timeline styled with HTML/Tailwind. Interaction: Static display. Justification: Chronological data best shown as a timeline.
+        - Q7 (User/System View): Goal: Compare. Method: Two distinct paragraphs with headings. Interaction: Static display. Justification: Direct comparison.
+        - Q8 (Interrupts): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q9 (Bootstrap): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q10 (Storage Hierarchy): Goal: Organize/Inform. Method: Stacked HTML divs styled with Tailwind to represent layers. Interaction: Static display. Justification: Visual representation of hierarchy without complex charts.
+        - Q11 (Core Functions): Goal: Inform. Method: HTML list. Interaction: Static display. Justification: Clear presentation of multiple items.
+        - Q12 (Process Mgt Tasks): Goal: Inform. Method: HTML list. Interaction: Static display. Justification: Clear presentation.
+        - Q13 (Memory Mgt): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q14 (File Mgt): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q15 (Device/IO Mgt): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q16 (Security Module): Goal: Inform. Method: HTML list/paragraph. Interaction: Static display. Justification: Clear explanation.
+        - Q17 (Advantages of OS): Goal: Inform. Method: HTML list. Interaction: Static display. Justification: Clear presentation.
+        - Q18 (Types of OS): Goal: Inform. Method: HTML list. Interaction: Static display. Justification: Clear presentation.
+        All content primarily from the source mind map. No Chart.js/Plotly.js needed.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for webkit browsers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #fde68a; /* amber-200 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d97706; /* amber-600 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #b45309; /* amber-700 */
+        }
+        /* For Firefox */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #d97706 #fde68a; /* thumb track */
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -0.6rem;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #d97706; /* amber-600 */
+            border-radius: 50%;
+            border: 2px solid #fffbeb; /* amber-50 */
+            z-index: 10;
+        }
+        .timeline-line {
+            position: absolute;
+            left: -0.275rem; 
+            top: 0.5rem;
+            bottom: -0.5rem;
+            width: 2px;
+            background-color: #fcd34d; /* amber-400 */
+        }
+         .storage-layer {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .storage-layer:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-neutral-800 flex flex-col min-h-screen">
+
+    <header class="bg-amber-600 text-white p-6 shadow-md">
+        <h1 class="text-3xl font-bold text-center">Interactive Operating Systems Concepts Explorer</h1>
+        <p class="text-center text-amber-100 mt-2">
+            Welcome! This application allows you to explore fundamental concepts related to Operating Systems.
+            Select a topic from the navigation panel on the left to view its detailed explanation.
+            This interactive guide is designed to help you understand the core components, functions, history, and types of OS.
+        </p>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <nav id="navigation" class="w-1/4 bg-amber-100 p-5 overflow-y-auto custom-scrollbar shadow-lg md:w-1/3 lg:w-1/4">
+            <h2 class="text-xl font-semibold text-amber-700 mb-4">Topics</h2>
+            <ul id="navList" class="space-y-2">
+                </ul>
+        </nav>
+
+        <main id="contentArea" class="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
+            <div id="welcomeMessage" class="text-center text-neutral-600">
+                <h2 class="text-2xl font-semibold text-amber-600 mb-4">Explore Operating System Concepts</h2>
+                <p class="text-lg">Please select a topic from the left navigation panel to display its details here.</p>
+                <div class="mt-8">
+                    <svg class="w-32 h-32 mx-auto text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+            </div>
+            </main>
+    </div>
+
+    <footer class="bg-amber-600 text-white text-center p-4 mt-auto">
+        <p>&copy; <span id="currentYear"></span> OS Concepts Explorer. All information based on provided study material.</p>
+    </footer>
+
+    <script>
+        const osConcepts = [
+            {
+                id: "q1",
+                title: "What are the four main components of a computer system?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Four Main Components of a Computer System</h3>
+                    <p class="mb-4 text-neutral-600">A computer system is comprised of four essential components that work together to provide computing capabilities. These are:</p>
+                    <ul class="list-none space-y-3 pl-0">
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow"><strong>Hardware:</strong> Includes the Central Processing Unit (CPU), memory (RAM), and Input/Output (I/O) devices. These physical parts provide the basic computing resources.</li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow"><strong>Operating System (OS):</strong> This is crucial software that controls and coordinates the use of hardware among various applications and users. It acts as an intermediary.</li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow"><strong>Application Programs:</strong> These are software tools like web browsers, word processors, spreadsheets, and databases that are designed to solve specific problems for the user.</li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow"><strong>Users:</strong> These can be people, machines, or other computers that interact with the system to perform tasks or access information.</li>
+                    </ul>
+                `
+            },
+            {
+                id: "q2",
+                title: "Define an operating system (OS) and list its three primary goals.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Operating System (OS): Definition and Goals</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">Definition</h4>
+                            <p class="text-neutral-700">The Operating System (OS) is an intermediary program that sits between the computer hardware and the users or application programs. Its fundamental role is to manage the execution of all other programs and to provide a platform upon which applications can run.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">Primary Goals</h4>
+                            <p class="text-neutral-700 mb-2">The OS aims to achieve three primary objectives:</p>
+                            <ol class="list-decimal list-inside space-y-2 text-neutral-700">
+                                <li><strong>Execute user programs and simplify problem-solving:</strong> The OS provides an environment where users can easily run their applications without needing to understand the complex details of hardware operation.</li>
+                                <li><strong>Provide a convenient, user-friendly interface:</strong> It aims to make the computer system easier to use by abstracting hardware complexities and offering intuitive ways for users to interact with the machine (e.g., GUIs, command lines).</li>
+                                <li><strong>Use hardware resources efficiently:</strong> The OS manages resources like the CPU, memory, and I/O devices to ensure they are utilized effectively and shared fairly among multiple users and applications.</li>
+                            </ol>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q3",
+                title: "What is the kernel?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">The Kernel</h3>
+                    <div class="p-4 bg-amber-50 rounded-lg shadow text-neutral-700 space-y-3">
+                        <p>The <strong>kernel</strong> is the core component of an operating system. It is the one program that is running at all times on the computer (often referred to as a resident program).</p>
+                        <p>Key characteristics of the kernel include:</p>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>It contains the most fundamental and critical parts of the OS.</li>
+                            <li>It resides in a protected area of memory to prevent it from being accidentally overwritten or corrupted by other programs.</li>
+                            <li>It is responsible for managing low-level tasks essential for the computer's operation, such as:
+                                <ul class="list-circle list-inside ml-6 mt-1 space-y-1">
+                                    <li><strong>CPU Scheduling:</strong> Deciding which process gets to use the CPU and for how long.</li>
+                                    <li><strong>Memory Management:</strong> Allocating and deallocating memory space to processes.</li>
+                                    <li><strong>Device I/O:</strong> Handling communication between software and hardware devices.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>Essentially, the kernel acts as the bridge between applications and the actual data processing done at the hardware level.</p>
+                    </div>
+                `
+            },
+            {
+                id: "q4",
+                title: "Explain how the OS acts as a resource allocator.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">The OS as a Resource Allocator</h3>
+                    <p class="mb-4 text-neutral-600">One of the primary roles of an Operating System is to act as a manager of the computer's resources. This involves several key functions:</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Resource Management & Tracking</h4>
+                            <p class="text-neutral-700">The OS keeps track of all available hardware and software resources. This includes CPU time, memory space, file-storage space, I/O devices (like printers and disk drives), and more.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Conflict Resolution</h4>
+                            <p class="text-neutral-700">In a multi-user or multi-tasking environment, there are often competing requests for the same resources. The OS arbitrates these conflicts, deciding which process gets which resource, when, and for how long, aiming for fair and efficient usage.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Dynamic Allocation & Deallocation</h4>
+                            <p class="text-neutral-700">The OS dynamically grants resources to processes when they start or request them during execution. Conversely, it reclaims (deallocates) these resources when processes finish or no longer need them, making them available for other processes. This ensures optimal utilization of the system's capabilities.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q5",
+                title: "In what way is the OS a control program?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">The OS as a Control Program</h3>
+                    <p class="mb-4 text-neutral-600">Beyond resource allocation, the Operating System also functions as a control program, overseeing and regulating the execution of user programs and the operation of I/O devices. This control is vital for system stability and security.</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Execution Control</h4>
+                            <p class="text-neutral-700">The OS monitors the execution of all programs (processes). It controls their access to hardware and software resources and intervenes to prevent errors, such as a program trying to access memory it doesn't own, or attempting to perform illegal operations that could crash the system.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Protection</h4>
+                            <p class="text-neutral-700">A key aspect of control is protection. The OS ensures that different programs running concurrently cannot interfere with each other or corrupt the kernel itself. This isolation is crucial for a stable multi-tasking environment.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">System Calls (Monitor Calls)</h4>
+                            <p class="text-neutral-700">Applications cannot directly access hardware or critical OS functions. Instead, the OS provides a controlled interface known as system calls (or monitor calls). When an application needs an OS service (e.g., reading a file, creating a new process), it makes a system call. The OS then performs the requested service in a secure and controlled manner, maintaining overall system integrity.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q6",
+                title: "Outline the major milestones in OS history.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Major Milestones in OS History</h3>
+                    <p class="mb-6 text-neutral-600">The evolution of Operating Systems has been marked by several significant advancements, transforming how we interact with computers. Here are some key milestones:</p>
+                    <div class="relative pl-8 border-l-2 border-amber-400">
+                        <div class="timeline-line"></div>
+                        <div class="mb-8 timeline-item">
+                            <h4 class="text-lg font-semibold text-amber-600">Early 1950s</h4>
+                            <p class="text-neutral-700">The first rudimentary batch-style Operating System was developed by General Motors Research for the IBM 701, which used tape storage. This marked the beginning of automating job processing.</p>
+                        </div>
+                        <div class="mb-8 timeline-item">
+                            <h4 class="text-lg font-semibold text-amber-600">Mid-1960s</h4>
+                            <p class="text-neutral-700">Disk-based Operating Systems began to emerge. The ability to directly access data on disks, rather than sequentially on tape, was a major step forward, enabling more complex OS functionalities.</p>
+                        </div>
+                        <div class="mb-8 timeline-item">
+                            <h4 class="text-lg font-semibold text-amber-600">Late 1960s</h4>
+                            <p class="text-neutral-700">The birth of UNIX at Bell Labs. UNIX introduced many influential concepts, including a hierarchical file system, command-line interface, and the idea of small, composable utility programs. It became highly influential in academia and industry.</p>
+                        </div>
+                        <div class="mb-8 timeline-item">
+                            <h4 class="text-lg font-semibold text-amber-600">1981</h4>
+                            <p class="text-neutral-700">Microsoft released its first Operating System, MS-DOS (Microsoft Disk Operating System), which it acquired from Seattle Computer Products (originally called 86-DOS). MS-DOS became the standard OS for IBM PC compatibles.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="text-lg font-semibold text-amber-600">1985</h4>
+                            <p class="text-neutral-700">Microsoft introduced Windows, a graphical user interface (GUI) layered on top of MS-DOS. This made computers more accessible to non-technical users and set the stage for modern graphical operating systems.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q7",
+                title: "Compare the User View and System View of an OS.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">User View vs. System View of an OS</h3>
+                    <p class="mb-6 text-neutral-600">The perspective on what an Operating System is and does can differ significantly depending on whether you are looking at it from a user's standpoint or a system's (developer/administrator) standpoint.</p>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">User View</h4>
+                            <p class="text-neutral-700">From the user's perspective, the OS is primarily about <strong>ease of use and interactive response</strong>. Users want a system that is intuitive, convenient, and allows them to run their applications effectively. For a single user on a personal computer, the OS is often seen as a dedicated resource provider, and the user might feel they have monopolized the system's resources, even if that's not technically true. The emphasis is on the user experience and getting tasks done without hassle.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">System View</h4>
+                            <p class="text-neutral-700">From the system's perspective (e.g., for OS developers or system administrators), the OS is viewed as a <strong>resource manager and control program</strong>. The focus is on managing complex hardware and software resources efficiently and fairly, especially in environments with multiple users or processes. Key concerns include:
+                                <ul class="list-disc list-inside mt-2 space-y-1">
+                                    <li><strong>Efficiency:</strong> Maximizing throughput and minimizing response time.</li>
+                                    <li><strong>Protection:</strong> Ensuring processes do not interfere with each other or the OS itself.</li>
+                                    <li><strong>Fairness:</strong> Allocating resources equitably among competing entities.</li>
+                                </ul>
+                            This view is more concerned with the internal workings and overall health and performance of the entire computer system.
+                            </p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q8",
+                title: "Describe how interrupts work and why they are important.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Interrupts: Mechanism and Importance</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">What is an Interrupt?</h4>
+                            <p class="text-neutral-700">An <strong>interrupt</strong> is a signal sent to the CPU (Central Processing Unit) that indicates an event requiring immediate attention. This signal can originate from either hardware (e.g., a key press, completion of a disk read) or software (e.g., an error condition, a system call).</p>
+                        </div>
+                         <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">How Interrupts Work (Handler Process)</h4>
+                            <p class="text-neutral-700">When the CPU receives an interrupt:</p>
+                            <ol class="list-decimal list-inside space-y-1 text-neutral-700 mt-2">
+                                <li>It pauses its current task, saving its state (e.g., the program counter and registers) so it can resume later.</li>
+                                <li>It identifies the source of the interrupt and transfers control to a specific piece of code called an <strong>interrupt service routine (ISR)</strong> or interrupt handler. This routine is designed to deal with the specific event that caused the interrupt.</li>
+                                <li>Once the ISR has finished processing the event, the CPU restores the saved state of the original task and resumes its execution from where it left off.</li>
+                            </ol>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-xl font-semibold text-amber-600 mb-2">Importance of Interrupts (Concurrency)</h4>
+                            <p class="text-neutral-700">Interrupts are crucial for modern operating systems primarily because they enable <strong>concurrency</strong> and improve system efficiency. They allow the CPU to perform other tasks while slower I/O operations are in progress. For example, instead of the CPU waiting idly for a disk to read data, it can switch to another process. When the disk read is complete, the disk controller sends an interrupt, signaling the CPU that the data is ready. This overlapping of CPU work and I/O operations significantly boosts overall system performance and responsiveness.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q9",
+                title: "What is the bootstrap (startup) process?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">The Bootstrap (Startup) Process</h3>
+                    <p class="mb-4 text-neutral-600">The bootstrap process, also known as booting or startup, is the sequence of operations the computer performs when it is first powered on or restarted. Its main goal is to load the operating system kernel into memory and start its execution.</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">1. Firmware (ROM/EPROM/Flash) Execution</h4>
+                            <p class="text-neutral-700">When the computer is powered on, the CPU begins executing code stored in firmware (e.g., BIOS on older PCs, UEFI on newer ones). This firmware is typically stored on a Read-Only Memory (ROM), Erasable Programmable ROM (EPROM), or Flash memory chip on the motherboard. The firmware contains the initial program called the <strong>bootstrap loader</strong> or bootloader.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">2. Initialization (POST)</h4>
+                            <p class="text-neutral-700">The bootstrap loader first performs basic hardware tests, known as the Power-On Self-Test (POST). This checks essential components like CPU, memory, and basic I/O devices. It also configures some hardware settings.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">3. Kernel Load</h4>
+                            <p class="text-neutral-700">Once the POST is successful, the bootstrap loader's primary task is to locate the operating system kernel on a storage device (like a hard drive, SSD, or USB drive). It then loads the kernel (or a part of it) into the main memory (RAM).</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">4. Kernel Execution & System Services</h4>
+                            <p class="text-neutral-700">After loading the kernel into memory, the bootstrap loader transfers control to it. The kernel then takes over, initializes itself further (e.g., sets up device drivers, memory management structures), and starts essential system processes and daemons (background services). Once these are running, the system is ready for user interaction or to run applications.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q10",
+                title: "Explain the storage‐device hierarchy.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Storage-Device Hierarchy</h3>
+                    <p class="mb-6 text-neutral-600">Computer systems use a variety of storage devices organized in a hierarchy based on speed, cost, and volatility. This hierarchy helps balance performance and capacity efficiently. Generally, as you move down the hierarchy, devices become slower, cheaper per bit, and offer larger capacities. Each level often caches data from the next lower (slower) level.</p>
+                    <div class="space-y-4">
+                        <div class="storage-layer p-4 bg-red-200 rounded-lg shadow text-red-800 border border-red-400">
+                            <h4 class="text-lg font-semibold">Registers & CPU Cache (L1, L2, L3)</h4>
+                            <p><strong>Speed:</strong> Fastest (nanoseconds). <strong>Size:</strong> Smallest (KB to MB). <strong>Volatility:</strong> Volatile (data lost on power off). Directly accessible by the CPU.</p>
+                        </div>
+                        <div class="storage-layer p-4 bg-orange-200 rounded-lg shadow text-orange-800 border border-orange-400">
+                            <h4 class="text-lg font-semibold">Main Memory (RAM - Random Access Memory)</h4>
+                            <p><strong>Speed:</strong> Fast (tens to hundreds of nanoseconds). <strong>Size:</strong> Medium (GBs). <strong>Volatility:</strong> Volatile. Holds currently running programs and their data.</p>
+                        </div>
+                        <div class="storage-layer p-4 bg-amber-200 rounded-lg shadow text-amber-800 border border-amber-400">
+                            <h4 class="text-lg font-semibold">Secondary Storage (e.g., SSDs, Hard Disk Drives - HDDs)</h4>
+                            <p><strong>Speed:</strong> Slower (milliseconds). <strong>Size:</strong> Large (hundreds of GBs to TBs). <strong>Volatility:</strong> Non-volatile (data retained on power off). Used for long-term storage of OS, applications, and user files.</p>
+                        </div>
+                         <div class="storage-layer p-4 bg-yellow-200 rounded-lg shadow text-yellow-800 border border-yellow-400">
+                            <h4 class="text-lg font-semibold">Tertiary Storage (e.g., Magnetic Tapes, Optical Disks, Cloud Storage)</h4>
+                            <p><strong>Speed:</strong> Slowest (seconds to minutes). <strong>Size:</strong> Very Large (TBs to PBs). <strong>Volatility:</strong> Non-volatile. Used for backups, archiving, or very large datasets not frequently accessed.</p>
+                        </div>
+                    </div>
+                    <p class="mt-6 text-neutral-600"><strong>Caching Principle:</strong> A fundamental concept in this hierarchy is caching. Faster, smaller storage levels are used to temporarily hold copies of data from slower, larger levels. This significantly speeds up access to frequently used data because the CPU can retrieve it from a faster cache rather than the slower main storage.</p>
+                `
+            },
+            {
+                id: "q11",
+                title: "List and briefly define the 11 core functions of the OS.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">11 Core Functions of the Operating System</h3>
+                    <p class="mb-4 text-neutral-600">The Operating System performs a multitude of critical functions to manage the computer system. Here are eleven core ones:</p>
+                    <ol class="list-decimal list-inside space-y-3 text-neutral-700">
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Process Management:</strong> Involves creating, deleting, suspending, resuming, and scheduling processes (running programs). It also handles inter-process communication (IPC) and synchronization to ensure processes can work together without conflict.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Memory Management:</strong> Allocates and deallocates RAM (main memory) space to processes as needed. It keeps track of which parts of memory are currently being used and by whom, and handles virtual memory systems (using disk space as an extension of RAM).</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>File Management:</strong> Organizes files in a hierarchical structure (directories/folders), controls access to files, and manages their storage, retrieval, naming, sharing, and protection.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Device Management:</strong> Manages all hardware devices connected to the computer. It tracks device status, allocates devices to processes, and manages device controllers through device drivers.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>I/O System Management:</strong> Provides a uniform interface to interact with various I/O devices, abstracting the specific hardware details from applications. This often involves buffering, caching, and spooling.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Secondary-Storage Management:</strong> Manages long-term storage devices like hard disks and SSDs. This includes tasks like disk formatting, free space management, storage allocation strategies, and data placement and retrieval.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Security:</strong> Protects system resources and data from unauthorized access, modification, or destruction. This involves authentication (verifying users), authorization (controlling access rights), and protection against threats.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Command Interpretation (Shell/GUI):</strong> Provides a way for users to interact with the OS, either through a command-line interface (shell) or a graphical user interface (GUI), to issue commands and run programs.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Networking:</strong> Enables communication between computers in a distributed system. It supports network protocols and allows for resource sharing (files, printers) and communication between processes on different machines.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Job Accounting:</strong> Keeps track of resource usage (CPU time, memory, disk space, etc.) by different jobs or users. This information can be used for billing, performance analysis, or resource planning.</li>
+                        <li class="p-3 bg-amber-50 rounded-md shadow-sm"><strong>Communication Management (Software Resources):</strong> Coordinates the use of shared software resources, such as compilers, interpreters, and libraries, among multiple users or processes.</li>
+                    </ol>
+                `
+            },
+            {
+                id: "q12",
+                title: "What tasks does the process‐management module perform?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Tasks of the Process Management Module</h3>
+                    <p class="mb-4 text-neutral-600">The process management module of an Operating System is responsible for overseeing the entire lifecycle and coordination of processes (instances of running programs). Its key tasks include:</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Process Lifecycle Management</h4>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1">
+                                <li><strong>Creation:</strong> Initiating new processes. This often involves operations like <code>fork()</code> (creating a copy of an existing process) and <code>exec()</code> (replacing the current process image with a new program).</li>
+                                <li><strong>Scheduling:</strong> Deciding which process in the ready state should be allocated the CPU next. This involves various scheduling algorithms (e.g., time-sharing, priority-based) to ensure fairness and efficiency.</li>
+                                <li><strong>Termination:</strong> Ending processes, either normally when they complete their task, or abnormally due to errors or external signals. This includes cleaning up resources used by the terminated process.</li>
+                                <li>Also includes suspending and resuming processes.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Synchronization</h4>
+                            <p class="text-neutral-700">When multiple processes access shared data or resources, their activities must be coordinated to prevent inconsistencies or errors (like race conditions). The OS provides synchronization mechanisms such as:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Semaphores:</strong> Signaling mechanisms to control access to shared resources.</li>
+                                <li><strong>Mutexes (Mutual Exclusion locks):</strong> Ensure that only one process can access a critical section of code or a shared resource at any given time.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Interprocess Communication (IPC)</h4>
+                            <p class="text-neutral-700">Processes often need to communicate and exchange data with each other. The OS facilitates this through various IPC mechanisms, including:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Pipes:</strong> Unidirectional communication channels between related processes.</li>
+                                <li><strong>Message Queues:</strong> Allow processes to send and receive messages asynchronously.</li>
+                                <li><strong>Shared Memory:</strong> Allows multiple processes to access the same region of memory for fast data exchange.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q13",
+                title: "How does memory management work in an OS?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Memory Management in an OS</h3>
+                    <p class="mb-4 text-neutral-600">Memory management is a critical function of the Operating System, responsible for efficiently allocating and managing the computer's main memory (RAM) among various competing processes. Its primary goals are to provide memory to processes when they need it and to protect their memory spaces from each other.</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Allocation & Deallocation</h4>
+                            <p class="text-neutral-700">The OS keeps track of which parts of memory are currently in use and by which process, and which parts are free. It allocates free memory space to processes when they are created or request more memory, and deallocates (reclaims) memory when processes terminate or release it. This involves strategies to minimize fragmentation (wasted memory space).</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Protection</h4>
+                            <p class="text-neutral-700">To ensure system stability and security, the OS must protect the memory space of one process from being accessed or corrupted by another process. It also protects the kernel's own memory space. This is typically achieved using hardware mechanisms like base and limit registers or memory management units (MMUs).</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Paging and/or Segmentation (Virtual Memory Techniques)</h4>
+                            <p class="text-neutral-700">Modern OSs use techniques like paging and segmentation to manage memory more flexibly and efficiently:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Paging:</strong> Divides physical memory into fixed-size blocks called frames, and logical memory (a process's address space) into blocks of the same size called pages. This allows a process's physical memory to be non-contiguous.</li>
+                                <li><strong>Segmentation:</strong> Divides a process's logical address space into segments of variable sizes, often corresponding to logical units like code, data, and stack.</li>
+                            </ul>
+                            <p class="text-neutral-700 mt-1">These techniques enable virtual memory, where parts of a process can reside on disk and be loaded into RAM only when needed.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Swapping</h4>
+                            <p class="text-neutral-700">When RAM becomes full, the OS can move entire processes or inactive pages/segments of processes from RAM to a backing store (usually a fast disk space called swap space). This frees up RAM for other active processes. When the swapped-out data is needed again, it is brought back into RAM. This process is known as swapping or paging out/in.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q14",
+                title: "Describe file management responsibilities.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">File Management Responsibilities of an OS</h3>
+                    <p class="mb-4 text-neutral-600">File management is a fundamental service provided by the Operating System. It deals with the creation, storage, organization, retrieval, sharing, and protection of files and directories on secondary storage devices (like hard drives and SSDs).</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Organization and Metadata</h4>
+                            <p class="text-neutral-700">The OS is responsible for organizing files into a structured system, typically a hierarchical directory (folder) structure. It also manages metadata for each file and directory, which includes information like:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li>Name and type</li>
+                                <li>Location on the storage device</li>
+                                <li>Size</li>
+                                <li>Creation/modification timestamps</li>
+                                <li>Ownership and permissions</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Storage Allocation</h4>
+                            <p class="text-neutral-700">The OS determines how files are stored on the physical disk. This involves allocating disk blocks to files and keeping track of free space. Common allocation methods include:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Contiguous Allocation:</strong> Each file occupies a contiguous set of blocks on the disk.</li>
+                                <li><strong>Linked Allocation:</strong> Each file is a linked list of disk blocks, which may be scattered anywhere on the disk.</li>
+                                <li><strong>Indexed Allocation:</strong> Uses an index block (or blocks) for each file, which contains pointers to all the data blocks of that file.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Access Control and Sharing</h4>
+                            <p class="text-neutral-700">The OS enforces access control policies to protect files from unauthorized access. This typically involves setting permissions (e.g., read, write, execute) for the owner, groups, and other users. It also manages file sharing mechanisms, allowing multiple users or processes to access files concurrently in a controlled manner.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Recovery and Reliability</h4>
+                            <p class="text-neutral-700">The OS may implement mechanisms to ensure file system integrity and recover from crashes or errors. This can include techniques like:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Journaling:</strong> Keeping a log of changes before they are written to the main file system, which helps in faster recovery after a crash.</li>
+                                <li><strong>Backup and Restore Utilities:</strong> Providing tools or supporting mechanisms for backing up files and restoring them in case of data loss.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q15",
+                title: "What do device and I/O‐system management encompass?",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Device and I/O System Management</h3>
+                    <p class="mb-4 text-neutral-600">Device and I/O (Input/Output) system management are crucial OS functions that handle the communication and control of all hardware devices connected to the computer, apart from the CPU and main memory. The goal is to provide a consistent and efficient way for applications to interact with a diverse range of devices.</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Device Drivers</h4>
+                            <p class="text-neutral-700">A key component is the <strong>device driver</strong>. This is a specific piece of software that understands the particular characteristics and command set of a hardware device (e.g., printer, network card, disk drive). Device drivers translate generic I/O requests from the OS or applications into hardware-specific operations that the device can execute, and vice-versa for input.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Buffering and Caching</h4>
+                            <p class="text-neutral-700">To manage the speed differences between the CPU and slower I/O devices, and to improve efficiency, the OS uses:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Buffering:</strong> Storing data temporarily in memory (a buffer) while it is being transferred between a device and an application, or between two devices. This helps to smooth out data flow.</li>
+                                <li><strong>Caching:</strong> Storing frequently accessed data from a slower device (like a disk) in a faster memory region (a cache) to speed up subsequent accesses to that data.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Spooling (Simultaneous Peripheral Operations On-Line)</h4>
+                            <p class="text-neutral-700">For devices that can only handle one request at a time (like printers), the OS uses spooling. Output data for the device is first written to a queue (a spool) on a disk. The device then processes these jobs from the queue one by one in the background. This allows applications to continue running without waiting for the slow device to complete its task.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Interrupt Handling</h4>
+                            <p class="text-neutral-700">I/O devices often use interrupts to signal the CPU when they have completed an operation (e.g., data read from disk is ready) or require attention. The OS's I/O system manages these interrupts, determines which device caused it, and invokes the appropriate interrupt service routine to handle the event.</p>
+                        </div>
+                         <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Device Allocation and Status Tracking</h4>
+                            <p class="text-neutral-700">The OS keeps track of all available devices, allocates them to processes that request them, and deallocates them when they are no longer needed. It also monitors the status of devices (e.g., busy, free, error state).</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q16",
+                title: "Explain the role of the security module in an OS.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Role of the Security Module in an OS</h3>
+                    <p class="mb-4 text-neutral-600">The security module of an Operating System is responsible for protecting the system and its resources (hardware, software, data) from unauthorized access, use, disclosure, alteration, or destruction. It aims to ensure the confidentiality, integrity, and availability of the system.</p>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Authentication</h4>
+                            <p class="text-neutral-700">This is the process of verifying the identity of a user, process, or device attempting to access the system. Common authentication mechanisms include:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Passwords:</strong> The most common form, where users provide a secret string.</li>
+                                <li><strong>Biometrics:</strong> Using unique physical characteristics (e.g., fingerprints, facial recognition).</li>
+                                <li><strong>Tokens/Smart Cards:</strong> Physical devices that generate one-time codes or store digital certificates.</li>
+                                <li><strong>Multi-Factor Authentication (MFA):</strong> Requiring two or more different types of verification.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Authorization (Access Control)</h4>
+                            <p class="text-neutral-700">Once a user or process is authenticated, authorization determines what resources they are allowed to access and what operations they are permitted to perform on those resources. This is typically managed through access control lists (ACLs), capabilities, or role-based access control (RBAC) policies. For example, a user might be authorized to read a file but not modify or delete it.</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Encryption and Auditing</h4>
+                            <p class="text-neutral-700">To further protect data and monitor system activity, the security module may support or manage:</p>
+                            <ul class="list-disc list-inside text-neutral-700 space-y-1 mt-1">
+                                <li><strong>Encryption:</strong> Transforming data into an unreadable format (ciphertext) to protect its confidentiality, both in transit (e.g., over a network) and at rest (e.g., on a disk). Decryption reverses this process.</li>
+                                <li><strong>Auditing (Logging):</strong> Recording security-relevant events, such as login attempts (successful and failed), file accesses, and system modifications. Audit logs are crucial for detecting suspicious activity, investigating security incidents (forensics), and ensuring compliance with security policies.</li>
+                            </ul>
+                        </div>
+                         <div class="p-4 bg-amber-50 rounded-lg shadow">
+                            <h4 class="text-lg font-semibold text-amber-600">Protection against Threats</h4>
+                            <p class="text-neutral-700">The OS security module also plays a role in defending against various threats like malware (viruses, worms, ransomware), denial-of-service attacks, and unauthorized intrusions. This can involve features like firewalls, intrusion detection systems (though often separate applications, the OS provides hooks), and ensuring system integrity.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: "q17",
+                title: "List the advantages of using an operating system.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Advantages of Using an Operating System</h3>
+                    <p class="mb-4 text-neutral-600">Operating Systems are indispensable in modern computing because they provide numerous advantages that make computers powerful, usable, and manageable. Key benefits include:</p>
+                    <ul class="list-none space-y-3 pl-0">
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Efficiency:</strong> OSs enable better utilization of hardware resources through techniques like multitasking (running multiple programs concurrently), time-sharing (allowing multiple users to share the system), and optimized resource allocation (CPU, memory, I/O devices). This leads to higher throughput and better system performance.
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Convenience (Ease of Use):</strong> The OS provides a unified and abstracted interface that hides the complex details of the underlying hardware. Users and application programmers can interact with the computer through intuitive GUIs or simpler command-line interfaces without needing to know low-level hardware specifics.
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Reliability and Stability:</strong> By managing resources and controlling program execution, the OS provides isolation between processes. This prevents errors or crashes in one application from affecting others or the entire system, leading to a more stable and reliable computing environment.
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Flexibility and Scalability:</strong> OSs support a wide range of functionalities like multitasking, multi-user environments, networking, and the ability to add new hardware or software. They can often be updated or upgraded to incorporate new features and technologies, allowing systems to adapt and scale over time.
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Security:</strong> The OS provides centralized control over access to system resources and data. Through mechanisms like authentication, authorization, and encryption, it helps protect against unauthorized access, data breaches, and other security threats.
+                        </li>
+                         <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Resource Sharing:</strong> OSs facilitate the sharing of hardware resources (like printers, disk drives) and software resources (like files, libraries) among multiple users or applications, improving cost-effectiveness and collaboration.
+                        </li>
+                         <li class="p-4 bg-amber-50 rounded-lg shadow hover:shadow-md transition-shadow">
+                            <strong class="text-amber-600">Platform for Application Development:</strong> The OS provides a consistent set of services and APIs (Application Programming Interfaces) that simplify the development of application software, as developers don't have to write code to directly manage hardware.
+                        </li>
+                    </ul>
+                `
+            },
+            {
+                id: "q18",
+                title: "Name and characterize the major types of operating systems.",
+                content: `
+                    <h3 class="text-2xl font-semibold text-amber-700 mb-4">Major Types of Operating Systems</h3>
+                    <p class="mb-4 text-neutral-600">Operating Systems can be categorized into several major types based on their characteristics, how they manage resources, and the environments they are designed for:</p>
+                    <ul class="list-none space-y-4 pl-0">
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Batch Operating System:</strong>
+                            <p class="text-neutral-700">Groups similar jobs together and executes them in batches without direct interactive user input. The OS processes one batch, then moves to the next. Common in early computing for tasks like payroll or billing.</p>
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Time-Sharing (Multitasking) Operating System:</strong>
+                            <p class="text-neutral-700">Allows multiple users or multiple programs to share the computer's resources simultaneously. It achieves this through rapid context switches between processes, giving each user/program a small slice of CPU time, creating the illusion of concurrent execution. Examples: UNIX, Linux, Windows, macOS.</p>
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Multiprocessor Operating System:</strong>
+                            <p class="text-neutral-700">Designed to manage and coordinate the use of multiple CPUs (processors) within a single computer system. This enables true parallel processing, significantly increasing computational power and throughput. Modern versions of Windows, Linux, and macOS are multiprocessor OSs.</p>
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Real-Time Operating System (RTOS):</strong>
+                            <p class="text-neutral-700">Used in systems where processing must occur within strict time constraints (deadlines). An RTOS guarantees that critical tasks will be completed within their specified time bounds. Essential for applications like industrial control systems, robotics, medical devices, and avionics. Examples: VxWorks, QNX.</p>
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Distributed Operating System:</strong>
+                            <p class="text-neutral-700">Manages a group of independent computers and makes them appear to be a single computer. It integrates networked machines into a cohesive system image, allowing resources and processing to be distributed across the network. Users are often unaware of where their programs are running or where their files are stored.</p>
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Network Operating System (NOS):</strong>
+                            <p class="text-neutral-700">Runs on a server and provides the capability to manage data, users, groups, security, applications, and other networking functions. It allows shared access to resources like files, printers, and applications over a network. Examples: Novell NetWare (historically), Windows Server, parts of Linux/UNIX.</p>
+                        </li>
+                        <li class="p-4 bg-amber-50 rounded-lg shadow">
+                            <strong class="text-amber-600 block mb-1">Mobile Operating System:</strong>
+                            <p class="text-neutral-700">Specifically designed to run on mobile devices like smartphones and tablets. These OSs are optimized for touch interfaces, power efficiency, wireless connectivity, and smaller screen sizes. Examples: Android (based on Linux kernel), iOS (Apple).</p>
+                        </li>
+                    </ul>
+                `
+            }
+        ];
+
+        const navList = document.getElementById('navList');
+        const contentArea = document.getElementById('contentArea');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        let currentActiveLink = null;
+
+        function displayContent(conceptId) {
+            const concept = osConcepts.find(c => c.id === conceptId);
+            if (concept) {
+                if (welcomeMessage) {
+                    welcomeMessage.style.display = 'none';
+                }
+                contentArea.innerHTML = `<div class="prose max-w-none prose-amber">${concept.content}</div>`;
+            }
+        }
+
+        osConcepts.forEach(concept => {
+            const listItem = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = '#';
+            link.textContent = `${concept.id.substring(1)}. ${concept.title}`;
+            link.classList.add('block', 'p-3', 'rounded-md', 'hover:bg-amber-200', 'hover:text-amber-700', 'transition-colors', 'duration-150', 'text-neutral-700', 'text-sm');
+            link.setAttribute('data-id', concept.id);
+
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentActiveLink) {
+                    currentActiveLink.classList.remove('bg-amber-300', 'text-amber-800', 'font-semibold');
+                    currentActiveLink.classList.add('text-neutral-700');
+                }
+                link.classList.add('bg-amber-300', 'text-amber-800', 'font-semibold');
+                link.classList.remove('text-neutral-700');
+                currentActiveLink = link;
+                displayContent(concept.id);
+            });
+            listItem.appendChild(link);
+            navList.appendChild(listItem);
+        });
+
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    </script>
+</body>
+</html>
