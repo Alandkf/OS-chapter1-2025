@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive OS Concepts Explorer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #fde68a; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #d97706; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #b45309; }
+    .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #d97706 #fde68a; }
+    .timeline-item::before { content: ''; position: absolute; left: -0.6rem; top: 0.5rem; width: 0.75rem; height: 0.75rem; background-color: #d97706; border-radius: 50%; border: 2px solid #fffbeb; z-index: 10; }
+    .timeline-line { position: absolute; left: -0.275rem; top: 0.5rem; bottom: -0.5rem; width: 2px; background-color: #fcd34d; }
+    .storage-layer, .memory-segment { transition: transform 0.3s, box-shadow 0.3s; }
+    .storage-layer:hover, .memory-segment:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05); }
+    .state-transition-diagram { border: 1px solid #fbbf24; padding: 1rem; border-radius: .5rem; background: #fffbeb; }
+    .state-box { border: 2px solid #d97706; padding: .5rem 1rem; border-radius: .375rem; background: #fef3c7; text-align: center; font-weight: 600; color: #92400e; }
+    .arrow { display: inline-block; margin: 0 .5rem; color: #ea580c; }
+  </style>
+</head>
+
+<body class="bg-amber-50 text-neutral-800 flex flex-col min-h-screen">
+
+  <header class="bg-amber-600 text-white p-6 shadow-md">
+    <h1 class="text-3xl font-bold text-center">Interactive Operating Systems Concepts Explorer</h1>
+    <p class="text-center text-amber-100 mt-2">
+      Welcome! Select a topic from the left panel to explore OS concepts.
+    </p>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+    <nav id="navigation" class="w-1/4 bg-amber-100 p-5 overflow-y-auto custom-scrollbar shadow-lg">
+      <h2 class="text-xl font-semibold text-amber-700 mb-4">Topics</h2>
+      <div id="chapter1Nav">
+        <h3 class="text-lg font-semibold text-amber-600 mt-4 mb-2">Chapter 1: OS Concepts</h3>
+        <ul id="navListChapter1" class="space-y-2"></ul>
+      </div>
+      <div id="chapter2Nav">
+        <h3 class="text-lg font-semibold text-amber-600 mt-6 mb-2">Chapter 2: Process Management</h3>
+        <ul id="navListChapter2" class="space-y-2"></ul>
+      </div>
+    </nav>
+
+    <main id="contentArea" class="flex-1 p-8 overflow-y-auto custom-scrollbar bg-white">
+      <div id="welcomeMessage" class="text-center text-neutral-600">
+        <h2 class="text-2xl font-semibold text-amber-600 mb-4">Explore Operating System Concepts</h2>
+        <p class="text-lg">Select a topic from the left to display its details here.</p>
+      </div>
+    </main>
+  </div>
+
+  <footer class="bg-amber-600 text-white text-center p-4 mt-auto">
+    <p>&copy; <span id="currentYear"></span> OS Concepts Explorer.</p>
+  </footer>
+
+  <script>
+    const chapter1Concepts = [
+      {
+        id: "q0",
+        title: "1. Four main components of a computer system?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Four Main Components of a Computer System</h3>
+          <ul class="list-disc ml-6 text-neutral-700 space-y-2">
+            <li><strong>Hardware:</strong> CPU, RAM, I/O devices.</li>
+            <li><strong>Operating System:</strong> Manages hardware & resources.</li>
+            <li><strong>Application Programs:</strong> Software tools serving users.</li>
+            <li><strong>Users:</strong> People or systems interacting with the computer.</li>
+          </ul>
+        `
+      }
+    ];
+
+    const chapter2Concepts = [
+      {
+        id: "q1",
+        title: "1. What is a Program in OS?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Program in Operating System</h3>
+          <p class="text-neutral-700">
+            A program is a passive collection of instructions stored on disk or secondary storage. It becomes a process only when executed.
+          </p>
+        `
+      },
+      {
+        id: "q2",
+        title: "2. What is a Process?",
+        content: `
+          <h3 class="text-2xl font-semibold text-blue-700 mb-4">Process in Operating System</h3>
+          <p class="text-neutral-700">
+            A process is a program in execution. It has its own PID, memory space, and execution state.
+          </p>
+        `
+      },
+      {
+        id: "q3",
+        title: "3. Difference between Program and Process?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Program vs. Process</h3>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
+              <h4 class="text-xl font-bold text-blue-700 mb-3">Program</h4>
+              <ul class="list-disc ml-5 text-neutral-700 space-y-1">
+                <li>Passive entity</li>
+                <li>Stored on disk</li>
+                <li>Static instructions</li>
+                <li>Long-term existence</li>
+                <li>No resource allocation</li>
+              </ul>
+            </div>
+            <div class="bg-green-50 p-6 rounded-lg border-2 border-green-200">
+              <h4 class="text-xl font-bold text-green-700 mb-3">Process</h4>
+              <ul class="list-disc ml-5 text-neutral-700 space-y-1">
+                <li>Active entity</li>
+                <li>Loaded in memory</li>
+                <li>Dynamic execution</li>
+                <li>Short-lived</li>
+                <li>Consumes CPU, memory, I/O</li>
+              </ul>
+            </div>
+          </div>
+        `
+      },
+      {
+        id: "q4",
+        title: "4. What is PCB?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Process Control Block (PCB)</h3>
+          <p class="text-neutral-700 mb-4">
+            PCB is a data structure holding all information about a process.
+          </p>
+          <ul class="list-disc ml-6 text-neutral-700 space-y-1">
+            <li>PID, User ID, Parent PID</li>
+            <li>Process state</li>
+            <li>Program counter</li>
+            <li>CPU registers</li>
+            <li>Scheduling info</li>
+            <li>Memory management info</li>
+            <li>Accounting info</li>
+            <li>I/O status</li>
+          </ul>
+        `
+      },
+      {
+        id: "q5",
+        title: "5. Memory segments of a process?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Memory Segments</h3>
+          <div class="flex flex-col space-y-2 max-w-md mx-auto">
+            <div class="memory-segment bg-red-100 p-4 rounded-t-lg">Stack (↓ grows downward)</div>
+            <div class="memory-segment bg-orange-50 p-3 border-dashed">Free Memory</div>
+            <div class="memory-segment bg-green-100 p-4">Heap (↑ grows upward)</div>
+            <div class="memory-segment bg-blue-100 p-4">Data (globals/static)</div>
+            <div class="memory-segment bg-purple-100 p-4 rounded-b-lg">Text (code)</div>
+          </div>
+        `
+      },
+      {
+        id: "q6",
+        title: "6. What is the Stack?",
+        content: `
+          <h3 class="text-2xl font-semibold text-blue-700 mb-4">Stack</h3>
+          <p class="text-neutral-700">Stores function calls, local variables, return addresses (LIFO).</p>
+        `
+      },
+      {
+        id: "q7",
+        title: "7. What is the Heap?",
+        content: `
+          <h3 class="text-2xl font-semibold text-blue-700 mb-4">Heap</h3>
+          <p class="text-neutral-700">Used for dynamic memory allocation at runtime.</p>
+        `
+      },
+      {
+        id: "q8",
+        title: "8. What is Context Switching?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Context Switching</h3>
+          <p class="text-neutral-700">Saving a running process’s state and loading another’s to enable multitasking.</p>
+        `
+      },
+      {
+        id: "q9",
+        title: "9. Why is Context Switching needed?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Need for Context Switching</h3>
+          <ul class="list-disc ml-6 text-neutral-700 space-y-1">
+            <li>Support multitasking</li>
+            <li>Handle interrupts</li>
+            <li>Serve high-priority tasks</li>
+            <li>Allow I/O waits without blocking CPU</li>
+          </ul>
+        `
+      },
+      {
+        id: "q10",
+        title: "10. What triggers Context Switching?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Triggers</h3>
+          <ul class="list-disc ml-6 text-neutral-700 space-y-1">
+            <li>Interrupts</li>
+            <li>Time-sharing (quantum expiration)</li>
+            <li>Mode switch (user ↔ kernel)</li>
+          </ul>
+        `
+      },
+      {
+        id: "q11",
+        title: "11. Steps in Context Switching?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Steps</h3>
+          <ol class="list-decimal ml-6 text-neutral-700 space-y-1">
+            <li>Save current process state to PCB</li>
+            <li>Update scheduling data</li>
+            <li>Select next process</li>
+            <li>Load new process state from PCB</li>
+            <li>Transfer control to new process</li>
+          </ol>
+        `
+      },
+      {
+        id: "q12",
+        title: "12. What are Process States?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Process States</h3>
+          <ul class="list-disc ml-6 text-neutral-700 space-y-1">
+            <li>New – being created</li>
+            <li>Ready – waiting for CPU</li>
+            <li>Running – executing</li>
+            <li>Waiting/Blocked – waiting for event</li>
+            <li>Terminated – finished</li>
+            <li>Suspend–Ready / Suspend–Wait – swapped out</li>
+          </ul>
+        `
+      },
+      {
+        id: "q13",
+        title: "13. What is New State?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">New</h3>
+          <p class="text-neutral-700">Process is being created; not yet ready to execute.</p>
+        `
+      },
+      {
+        id: "q14",
+        title: "14. What is Ready State?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Ready</h3>
+          <p class="text-neutral-700">Process is in memory, waiting for CPU assignment.</p>
+        `
+      },
+      {
+        id: "q15",
+        title: "15. What is Running State?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Running</h3>
+          <p class="text-neutral-700">Process is currently executing on the CPU.</p>
+        `
+      },
+      {
+        id: "q16",
+        title: "16. What is Terminated State?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Terminated</h3>
+          <p class="text-neutral-700">Process has finished execution and is removed.</p>
+        `
+      },
+      {
+        id: "q17",
+        title: "17. Suspend–Ready & Suspend–Wait?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Suspended States</h3>
+          <ul class="list-disc ml-6 text-neutral-700 space-y-1">
+            <li>Suspend–Ready: Ready process moved to secondary storage.</li>
+            <li>Suspend–Wait: Blocked process moved out due to memory constraints.</li>
+          </ul>
+        `
+      },
+      {
+        id: "q18",
+        title: "18. Degree of Multiprogramming?",
+        content: `
+          <h3 class="text-2xl font-semibold text-amber-700 mb-4">Degree of Multiprogramming</h3>
+          <p class="text-neutral-700">
+            Number of processes in memory concurrently. Higher means better CPU use but more overhead.
+          </p>
+        `
+      }
+    ];
+
+    const contentArea = document.getElementById("contentArea");
+    const welcomeMessage = document.getElementById("welcomeMessage");
+    let currentActiveLink = null;
+
+    function displayContent(conceptId) {
+      const all = [...chapter1Concepts, ...chapter2Concepts];
+      const item = all.find(c => c.id === conceptId);
+      if (!item) return;
+      welcomeMessage?.style.setProperty("display", "none", "important");
+      contentArea.innerHTML = `<div class="prose max-w-none prose-amber">${item.content}</div>`;
+      contentArea.scrollTop = 0;
+    }
+
+    function populateNavList(concepts, ulId) {
+      const ul = document.getElementById(ulId);
+      if (!ul) return;
+      concepts.forEach(c => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = "#"; a.textContent = c.title;
+        a.className = "block p-3 rounded-md hover:bg-amber-200 hover:text-amber-700 text-neutral-700 text-sm";
+        a.addEventListener("click", e => {
+          e.preventDefault();
+          currentActiveLink?.classList.remove("bg-amber-300", "text-amber-800", "font-semibold");
+          a.classList.add("bg-amber-300", "text-amber-800", "font-semibold");
+          currentActiveLink = a;
+          displayContent(c.id);
+        });
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+
+    populateNavList(chapter1Concepts, "navListChapter1");
+    populateNavList(chapter2Concepts, "navListChapter2");
+    document.getElementById("currentYear").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

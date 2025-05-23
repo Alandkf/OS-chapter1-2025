@@ -80,6 +80,8 @@
         /* Add transition for sidebar */
         #navigation {
             transition: transform 0.3s ease-in-out;
+            max-height: 100vh; /* Set maximum height to viewport height */
+            overflow-y: auto; /* Ensure vertical scrolling */
         }
         /* Mobile sidebar hidden by default */
         @media (max-width: 768px) {
